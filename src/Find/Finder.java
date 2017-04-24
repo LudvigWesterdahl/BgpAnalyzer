@@ -3,6 +3,7 @@ package Find;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * This class <tt>finds</tt> MRT headers = files which are of interest.<br>
@@ -58,69 +59,92 @@ public class Finder {
 		int[] dirRange = new int[2]; /* dirRange[0] = Start, dirRange[1] = End. */
 		
 		/* Parsing arguments. */
-		boolean argsLeftToParse = true;
-		int argIndex = 0; 
-		while(argsLeftToParse) {
-			for (int i = 0; i<args.length; i++) {
-				
+		Pattern commandPatter = Pattern.compile("-\\w");
+		for (int i = 0; i<args.length; i++) {
+			System.out.println("i = " + i);
+			switch (args[i]) {
+				case "-p":
+					i++;
+					while(i < args.length && !commandPatter.matcher(args[i]).matches()) {
+						prefixes.add(args[i]);
+						i++;
+					}
+					i--;
+					break;
+				case "-s":
+					i++;
+					while(i < args.length && !commandPatter.matcher(args[i]).matches()) {
+						sequenceNumbers.add(Integer.parseInt(args[i]));
+						i++;
+					}
+					i--;
+					break;
+				case "-i":
+					i++;
+					while(i < args.length && !commandPatter.matcher(args[i]).matches()) {
+						peerIndexes.add(Integer.parseInt(args[i]));
+						i++;
+					}
+					i--;
+					break;
+				case "-v":
+					i++;
+					while(i < args.length && !commandPatter.matcher(args[i]).matches()) {
+						pathSegmentValues.add(Integer.parseInt(args[i]));
+						i++;
+					}
+					i--;
+					break;
+				case "-n":
+					i++;
+					while(i < args.length && !commandPatter.matcher(args[i]).matches()) {
+						nextHops.add(args[i]);
+						i++;
+					}
+					i--;
+					break;
+				case "-a":
+					i++;
+					while(i < args.length && !commandPatter.matcher(args[i]).matches()) {
+						peerASs.add(Integer.parseInt(args[i]));
+						i++;
+					}
+					i--;
+					break;
+				case "-d":
+					i++;
+					dirRange[0] = Integer.parseInt(args[i].substring(0, args[i].indexOf(':')));
+					dirRange[1] = Integer.parseInt(args[i].substring(args[i].indexOf(':')+1, args[i].length()));
+					break;
+				default:
+					break;
 			}
-			
-			
-			
 		}
-		
-		
-		for (String arg : args) {
-			switch (arg) {
-			case "-p":
-				System.out.println("-p");
-				prefixes.add(arg);
-				break;
-			case "-s":
-				sequenceNumbers.add(Integer.parseInt(arg));
-				System.out.println("-s");
-				break;
-			case "-i":
-				peerIndexes.add(Integer.parseInt(arg));
-				System.out.println("-i");
-				break;
-			case "-v":
-				pathSegmentValues.add(Integer.parseInt(arg));
-				System.out.println("-v");
-				break;
-			case "-n":
-				nextHops.add(arg);
-				System.out.println("-n");
-				break;
-			case "-a":
-				peerASs.add(Integer.parseInt(arg));
-				System.out.println("-a");
-				break;
-			case "-d":
-				dirRange[0] = Integer.parseInt(arg.substring(0, arg.indexOf(':')));
-				dirRange[1] = Integer.parseInt(arg.substring(arg.indexOf(':'), arg.length()));
-				System.out.println("-d");
-				break;
-			default:
-				System.out.println("default");
-				break;
-					
-			}
-			System.out.println("PREFIXES");
-			for (String prefix : prefixes) {
-				System.out.println(prefix);
-			}
-			System.out.println("---------");
-			System.out.println("DIR RANGE");
-			System.out.println("Start - " + dirRange[0]);
-			System.out.println("End - " + dirRange[1]);
-			System.out.println("---------");
-			
-			
-		}
-	}
-	
-	
-	
 
+		System.out.println("PREFIXES");
+		for (String prefix : prefixes) {
+			System.out.println(prefix);
+		}
+		System.out.println("---------");
+		System.out.println("DIR RANGE");
+		System.out.println("Start - " + dirRange[0]);
+		System.out.println("End - " + dirRange[1]);
+		System.out.println("---------");
+		
+		/* Generating regex. */
+		
+		/* LOOP */
+		
+		/* Reading files specified from argument '-d' in DIRRANGE.*/
+		
+		/* Matching the regex. */
+		
+		/* Add file name to F_FILES */
+		
+		/* LOOP */
+		
+		
+		
+		
+	}
 }
