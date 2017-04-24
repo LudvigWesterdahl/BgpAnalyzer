@@ -25,5 +25,19 @@ public class Tester {
 			System.out.println(" i = " + i);
 			i += 1;
 		}
+		
+		
+		String testMatcher = "MRT Headern\nTimestamp: 1491904800(2017-04-11 12:00:00)\nType: 13(TABLE_DUMP_V2)\nSubtype: 2(RIB_IPV4_UNICAST)\nLength: 172\n"
+				+ "RIB_IPV4_UNICAST\nSequence Number: 0\nPrefix Length: 0\nPrefix: 0.0.0.0\n";
+		Pattern pattern = Pattern.compile("(\\w|\\W)*((Prefix: 1.0.0.0)|(Sequence Number: 2)|(Type: 13))(\\w|\\W)*");
+		if (pattern.matcher(testMatcher).matches()) {
+			System.out.println("Matched");
+		} else {
+			System.out.println("Did not match");
+		}
+		StringBuilder stringBuilder = new StringBuilder().append("asdasdasd").append("|").append("Hello").append("|");
+		System.out.println(stringBuilder.toString());
+		stringBuilder.delete(stringBuilder.length() - 1, stringBuilder.length());
+		System.out.println(stringBuilder.toString());
 	}
 }
