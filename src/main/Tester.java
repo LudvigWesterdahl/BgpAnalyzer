@@ -1,9 +1,13 @@
 package main;
 
-import java.awt.geom.Dimension2D;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
+
+
 import Extract.Extractor;
+import Find.Finder;
 
 public class Tester {
 	public static void main(String args[]) {
@@ -39,5 +43,39 @@ public class Tester {
 		System.out.println(stringBuilder.toString());
 		stringBuilder.delete(stringBuilder.length() - 1, stringBuilder.length());
 		System.out.println(stringBuilder.toString());
+		List<String> extractorArgs = new ArrayList<>();
+		List<String> finderArgs = new ArrayList<>();
+		extractorArgs.add("data.txt");
+		extractorArgs.add("10");
+		finderArgs.add("-f");
+		finderArgs.add("10");
+		finderArgs.add("-p");
+		finderArgs.add("1.0.4.0");
+		finderArgs.add("-d");
+		finderArgs.add("1:1");
+		StringBuilder regex2 = new StringBuilder()
+				.append("[> ]")
+				.append(Finder.CHARS_NO_PARANTHESIS)
+				.append("[(]")
+				.append("Prefix")
+				.append("[)]");
+		String regex3 = "> " + Finder.CHARS_NO_PARANTHESIS + "[(]";
+		Pattern pattern2 = Pattern.compile(regex2.toString());
+		if (pattern2.matcher("> Prefixes (Prefsx)").matches()) {
+			System.out.println("Matched");
+		} else {
+			System.out.println("Did not match");
+		}
+		
+		
+		String someString = "abc\nabc123\nbajs\n";
+		int bajsIndex = someString.indexOf("bajs");
+		System.out.println("Index = " + bajsIndex);
+		int abcIndex = someString.indexOf("abc");
+		System.out.println("ABCindex = " + abcIndex);
+		int abcBeforeBajsIndex = someString.substring(0, bajsIndex).lastIndexOf("abc");
+		System.out.println("last index = " + abcBeforeBajsIndex);
+		
+		
 	}
 }
