@@ -1,6 +1,7 @@
 package Find;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -63,6 +64,7 @@ public class Finder {
 	public static String OR = "|";
 	public static String FILE_BASE_NAME = "F_FILE";
 	public static String FILE_META_BASE_NAME = "F_META_FILE";
+	public static String DIR_ROOT_NAME = "F_ROOT_DIR/";
 	public final static String LINE_DIVIDER = "-----------------------";
 
 	
@@ -77,6 +79,7 @@ public class Finder {
 		Integer[] dirRange = new Integer[2];
 		
 		int foldersFileSize = 0;
+		new File(Finder.DIR_ROOT_NAME).mkdir();
 
 		/**
 		 * Parsing arguments.
@@ -333,7 +336,7 @@ public class Finder {
 	public static String generateUniqueFileName(String name) {
 		for (int i = 1;; i++) {
 			if (!Files.exists(Paths.get(name + "_" + i))) {
-				return name + "_" + i;
+				return Finder.DIR_ROOT_NAME + name + "_" + i;
 			}
 		}
 	}

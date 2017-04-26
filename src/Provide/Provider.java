@@ -2,6 +2,7 @@ package Provide;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -81,6 +82,8 @@ public class Provider {
 	 * 
 	 * */
 	public final static int NUMBER_OF_IDENTIFIERS = 7;
+	public final static String FILE_BASE_NAME = "P_FILE";
+	public final static String DIR_ROOT_NAME = "P_ROOT_DIR/";
 	public static String[] IDENTIFIERS = {"Prefix", "Sequence Number", "Peer Index", "Path Segment Value", "NEXT_HOP", "Peer AS"};
 	
 	public static void main(String[] args) {
@@ -121,7 +124,7 @@ public class Provider {
 		int bytesRead;
 		StringBuilder lineBuilder = new StringBuilder();
 		byte[] buffer = new byte[Extractor.KB];
-		try (FileInputStream in = new FileInputStream(finderFileName)){
+		try (FileInputStream in = new FileInputStream(Finder.DIR_ROOT_NAME + finderFileName)){
 			while((bytesRead = in.read(buffer)) != -1) {
 				lineBuilder.append(new String(buffer, 0, bytesRead));
 			}
@@ -144,7 +147,7 @@ public class Provider {
 		 * Read from F_META_FILE_X
 		 * START
 		 */
-		try (FileInputStream in = new FileInputStream(metaFileName)){
+		try (FileInputStream in = new FileInputStream(Finder.DIR_ROOT_NAME + metaFileName)){
 			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
 			for (int i = 0; i < IDENTIFIERS.length; i++) {
 				identifierDataLists[i] = getIdentifierLines(IDENTIFIERS[i], bufferedReader);
@@ -170,7 +173,9 @@ public class Provider {
 		/* Loop START */
 		System.out.println("Before");
 		System.out.println(finderFileLines.size());
+		new File(Provider.DIR_ROOT_NAME).mkdir();
 		for (String fileName : finderFileLines) {
+			System.out.println("FileName = " + fileName);
 			/**
 			 * Search in E_FILE_X
 			 * START
@@ -182,6 +187,7 @@ public class Provider {
 				while((bytesRead = in.read(fileBuffer)) != -1) {
 					fileBuilder.append(new String(fileBuffer, 0, bytesRead));
 				}
+				/*
 				BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 				for (String nextHop : identifierDataLists[4]) {
 					int nextHopIndex = fileBuilder.toString().indexOf(nextHop);
@@ -215,48 +221,40 @@ public class Provider {
 					});
 					out.write(("\n").getBytes());
 				}
-				System.out.println("SIZE = ");
-				System.out.println(identifierDataLists[3].size());
+				*/
+				/* AS provided. */
+				
+				String pFile = DIR_ROOT_NAME + FILE_BASE_NAME + "_" + fileName.substring(fileName.lastIndexOf('_') + 1, fileName.length());
+				System.out.println("Writing to " + pFile);
+				FileOutputStream out = new FileOutputStream(pFile);
+				String fileAsString = fileBuilder.toString();
+				out.write((getMrtInitialDataHeader(fileAsString, "Prefix: ") + "\n").getBytes());
+				out.write((getMrtInitialDataHeader(fileAsString, "Prefix Length: ") + "\n").getBytes());
+				out.flush();
+				
+				StringBuilder asListBuilder = new StringBuilder();
+				identifierDataLists[3].stream().forEach((v)->{
+					if (fileAsString.contains(v)) {
+						asListBuilder.append(v + ":");	
+					}
+				}); /* Ad to the header of P_FILE */
+				if (asListBuilder.length() > 0) {
+					asListBuilder.deleteCharAt(asListBuilder.length() - 1);	
+				}
+				out.write(asListBuilder.toString().getBytes());
+				out.write("\n".getBytes());
+				out.write("\n".getBytes());
 				for (String asn : identifierDataLists[3]) {
-					String fileAsString = fileBuilder.toString();
-					String pathSegmentValue = "Path Segment Value: ";
-					/* Loop of all occurences of the ASN. */
-					int asnIndex = 0;
-					while((asnIndex = fileAsString.indexOf(asn, asnIndex + 1)) != -1) {
-						String subString = fileAsString.substring(0, asnIndex);
-						
-						int lineStartIndex = subString.lastIndexOf(pathSegmentValue);
-						//System.out.println(subString.substring(lineStartIndex, lineStartIndex + 21));
-						int lineEndIndex = fileAsString.indexOf('\n', lineStartIndex);
-						String pathLine = fileAsString.substring(lineStartIndex + pathSegmentValue.length(), lineEndIndex);
-						String[] asArray = pathLine.split(" ");
-						List<String> asList = new ArrayList<>(Arrays.asList(asArray));
-						System.out.println("---PATH---");
-						asList.stream().forEach((v)->System.out.println(v));
-						System.out.println("----------");
-						FileOutputStream out = new FileOutputStream("P_FILE_" + fileName.substring(fileName.lastIndexOf('_') + 1, fileName.length()));
-						asList.stream().forEach((v)->{
+					List<String> paths = getAsPaths(fileAsString, asn);
+					paths.stream().forEach((v)->{
 						try {
-							if (asList.indexOf(v) == asList.size() - 1) {
-								out.write((v).getBytes());	
-							} else {
-								out.write((v + " -> ").getBytes());
-							}
+							out.write((v + "\n").getBytes());
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
 					});
-					out.write(("\n").getBytes());
-						
-					}
-					/* Get prefix */
-					
-					
-					/* Get AS-PATH*/
-					/* Get NEXT_HOP*/
 				}
-				
-				
+				out.close();
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -264,9 +262,6 @@ public class Provider {
 			} catch (SecurityException e) {
 				e.printStackTrace();
 			}
-			
-			
-			
 			/**
 			 * Search in E_FILE_X
 			 * END
@@ -282,19 +277,14 @@ public class Provider {
 			 * END
 			 */
 		}
-		
-		
-		
-		/* Loop END*/
-		
 	}
+	
 	public static List<String> getIdentifierLines(String identifier, BufferedReader in) {
-		BufferedReader bufferedReader = in;
 		List<String> list = new ArrayList<>();
 		try {
 			String line;
 			boolean foundIdentifier = false;
-			while((line = bufferedReader.readLine()) != null) {
+			while((line = in.readLine()) != null) {
 				if (foundIdentifier || Finder.getHeadPattern(identifier).matcher(line).matches()) {
 					foundIdentifier = true;
 					list.add(line);
@@ -310,6 +300,28 @@ public class Provider {
 			e.printStackTrace();
 		}
 		return list;
+	}
+	
+	public static String getMrtInitialDataHeader(String mrtFile, String header) {
+		int prefixStartIndex = mrtFile.indexOf(header) + header.length();
+		int prefixEndIndex = mrtFile.indexOf('\n', prefixStartIndex);
+		String prefixString = mrtFile.substring(prefixStartIndex, prefixEndIndex);
+		return prefixString;
+
+	}
+	
+	public static List<String> getAsPaths(String mrtHeader, String asn) {
+		String psv = "Path Segment Value: ";
+		List<String> asPathsList = new ArrayList<>();
+		int currentAsnIndex = 0;
+		for (int currPsvIndex = 0; currPsvIndex != -1; currPsvIndex = mrtHeader.indexOf(psv, currPsvIndex + 1)) {
+			int endOfLineIndex = mrtHeader.indexOf('\n', currPsvIndex);
+			String line = mrtHeader.substring(currentAsnIndex + psv.length(), endOfLineIndex);
+			if (line.contains(asn)) {
+				asPathsList.add(line);
+			}
+		}
+		return asPathsList;
 	}
 	
 }

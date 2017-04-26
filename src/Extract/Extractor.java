@@ -47,12 +47,7 @@ public class Extractor {
 	private static int DIR_ID_COUNTER = 1;
 	private static String ARGUMENTS_ERROR_TEXT = "Bad arguments.\n" + "Argument 1. Filename of the data file.\n"
 			+ "Argument 2. Number of files for each folder.";
-	/**
-	 * TODO:
-	 * 1. Make the buffer bigger than 63, to read more and make it more efficient.
-	 * 
-	 * 
-	 */
+	
 	public static void main(String[] args) {
 		String dataFileName = "";
 		int folderFilesSize = 0;
