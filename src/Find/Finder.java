@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import Extract.Extractor;
-import sun.swing.plaf.synth.DefaultSynthStyle.StateInfo;
 
 /**
  * This class <tt>finds</tt> MRT headers = files which are of interest.<br>
@@ -168,7 +167,7 @@ public class Finder {
 			regexBuilder.append(Finder.generateRegex("Peer Index: " + peerIndex)).append("|");
 		}
 		for (Integer pathSegmentValue : pathSegmentValues) {
-			regexBuilder.append(Finder.generateRegex("Path Segment Value: " + "\\d*\\s" + pathSegmentValue)).append("|");
+			regexBuilder.append(Finder.generateRegex("Path Segment Value: " + "(\\d*\\s)*" + pathSegmentValue)).append("|");
 		}
 		for (String nextHop : nextHops) {
 			regexBuilder.append(Finder.generateRegex("NEXT_HOP: " + nextHop)).append("|");

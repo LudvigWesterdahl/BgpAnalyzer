@@ -17,9 +17,6 @@ import java.util.regex.Pattern;
 
 import javax.xml.stream.events.StartDocument;
 
-import com.sun.jndi.ldap.LdapClient;
-import com.sun.org.apache.bcel.internal.generic.NEW;
-
 import Extract.Extractor;
 import Find.Finder;
 
@@ -65,7 +62,7 @@ public class Provider {
 	 * 
 	 * 
 	 * ---4. Sending a path segment value (an AS number)---
-	 * 	Prefix with the length.
+	 * 	Prefix with the length. And the whole AS-PATH
 	 * 
 	 * 	Peer-index
 	 * 	The whole PATH. All numbers, AS-PATH.
@@ -171,6 +168,8 @@ public class Provider {
 		 */
 		
 		/* Loop START */
+		System.out.println("Before");
+		System.out.println(finderFileLines.size());
 		for (String fileName : finderFileLines) {
 			/**
 			 * Search in E_FILE_X
@@ -215,6 +214,46 @@ public class Provider {
 						}
 					});
 					out.write(("\n").getBytes());
+				}
+				System.out.println("SIZE = ");
+				System.out.println(identifierDataLists[3].size());
+				for (String asn : identifierDataLists[3]) {
+					String fileAsString = fileBuilder.toString();
+					String pathSegmentValue = "Path Segment Value: ";
+					/* Loop of all occurences of the ASN. */
+					int asnIndex = 0;
+					while((asnIndex = fileAsString.indexOf(asn, asnIndex + 1)) != -1) {
+						String subString = fileAsString.substring(0, asnIndex);
+						
+						int lineStartIndex = subString.lastIndexOf(pathSegmentValue);
+						//System.out.println(subString.substring(lineStartIndex, lineStartIndex + 21));
+						int lineEndIndex = fileAsString.indexOf('\n', lineStartIndex);
+						String pathLine = fileAsString.substring(lineStartIndex + pathSegmentValue.length(), lineEndIndex);
+						String[] asArray = pathLine.split(" ");
+						List<String> asList = new ArrayList<>(Arrays.asList(asArray));
+						System.out.println("---PATH---");
+						asList.stream().forEach((v)->System.out.println(v));
+						System.out.println("----------");
+						FileOutputStream out = new FileOutputStream("P_FILE_" + fileName.substring(fileName.lastIndexOf('_') + 1, fileName.length()));
+						asList.stream().forEach((v)->{
+						try {
+							if (asList.indexOf(v) == asList.size() - 1) {
+								out.write((v).getBytes());	
+							} else {
+								out.write((v + " -> ").getBytes());
+							}
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					});
+					out.write(("\n").getBytes());
+						
+					}
+					/* Get prefix */
+					
+					
+					/* Get AS-PATH*/
+					/* Get NEXT_HOP*/
 				}
 				
 				

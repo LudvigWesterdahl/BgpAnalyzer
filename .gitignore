@@ -1,5 +1,11 @@
 # Emacs safe copy
 *~
+# Generated Files and parsed.
+E_*
+F_*
+P_*
+parsed*
+
 # Mac OSX files
 .DS_Store
 
