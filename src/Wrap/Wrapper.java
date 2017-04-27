@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import Extract.Extractor;
 import Find.Finder;
+import Join.Joiner;
 import Provide.Provider;
 /*TODO: 
  * 1. Add argument to take in how many threads to use when finding and providing.
@@ -99,6 +100,9 @@ public class Wrapper {
 		System.out.println("Done");
 		System.out.println("Providing...");
 		Provider.main(providerArgs.toArray(new String[0]));
+		System.out.println("Done");
+		System.out.println("Joining...");
+		Joiner.main(joinerArgs.toArray(new String[0]));
 		System.out.println("Done");
 	}
 }

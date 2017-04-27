@@ -138,6 +138,21 @@ public class Provider {
 			System.out.println(line);
 		}
 		System.out.println(metaFileName);
+		try {
+			FileOutputStream pMetaOut = new FileOutputStream("P_META_FILE");
+			Integer size = finderFileLines.size();
+			pMetaOut.write(size.toString().getBytes());
+			pMetaOut.write("\n".getBytes());
+			pMetaOut.flush();
+			pMetaOut.close();
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+			
+
 		/**
 		 * Read from F_FILE_X
 		 * END
@@ -246,6 +261,7 @@ public class Provider {
 				out.write("\n".getBytes());
 				for (String asn : identifierDataLists[3]) {
 					List<String> paths = getAsPaths(fileAsString, asn);
+					System.out.println("paths.size = " + paths.size() + " for asn = " + asn);
 					paths.stream().forEach((v)->{
 						try {
 							out.write((v + "\n").getBytes());
@@ -316,7 +332,7 @@ public class Provider {
 		int currentAsnIndex = 0;
 		for (int currPsvIndex = 0; currPsvIndex != -1; currPsvIndex = mrtHeader.indexOf(psv, currPsvIndex + 1)) {
 			int endOfLineIndex = mrtHeader.indexOf('\n', currPsvIndex);
-			String line = mrtHeader.substring(currentAsnIndex + psv.length(), endOfLineIndex);
+			String line = mrtHeader.substring(currPsvIndex + psv.length(), endOfLineIndex);
 			if (line.contains(asn)) {
 				asPathsList.add(line);
 			}

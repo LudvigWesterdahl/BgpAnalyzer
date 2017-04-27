@@ -77,7 +77,7 @@ public class Extractor {
 			 * reset the stream and the rest of the data in buffer needs to be added to the resetted bufferStream.
 			 * */
 			int numberOfFiles = 0;
-			while((bytesRead = from.read(buffer)) != -1 && numberOfFiles < 20){
+			while((bytesRead = from.read(buffer)) != -1){
 				String bufferAsString = new String(buffer, 0, bytesRead);
 				
 				if (LINE_PATTERN.matcher(bufferAsString).matches()) {
