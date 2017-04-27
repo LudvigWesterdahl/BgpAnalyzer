@@ -1,22 +1,16 @@
 package Provide;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.Buffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import javax.xml.stream.events.StartDocument;
 
 import Extract.Extractor;
 import Find.Finder;
@@ -40,61 +34,17 @@ import Find.Finder;
  * @see     Join.Joiner
  */
 public class Provider {
-	/*
-	 * ---1. Sending prefix---
-	 * 	You get the prefix, prefix length, AS-path, next-hop. since there might be different AS on different prefix length.
-	 * 	All must be included.
-	 * 	If there is two announcements for two prefixes, then we should put them under same prefix but add another AS-PAth.
-	 * 	1.0.4.0/22
-	 * 	AS-Path: 5837 1928 2837
-	 * 	NEXT_HOP: 192.168.1.1
-	 * 
-	 * 	1.0.4.0/24
-	 * 	AS-Path: 5837 1928 2837
-	 * 	NEXT_HOP: 192.168.1.1
-	 * 
-	 * 
-	 * ---2. Sending sequence number---
-	 * 	Prefix, prefix length, peer index.
-	 * 
-	 * 
-	 * ---3. Sending peer Index---
-	 * 	prefix, prefix length.
-	 * 
-	 * 
-	 * ---4. Sending a path segment value (an AS number)---
-	 * 	Prefix with the length. And the whole AS-PATH
-	 * 
-	 * 	Peer-index
-	 * 	The whole PATH. All numbers, AS-PATH.
-	 * 	Next_HOP
-	 *
-	 * 
-	 * ---5. Sending NEXT_HOP---
-	 * 	You want Prefix of the MRT header and prefix length.
-	 * Also the Path segment value.
-	 * 
-	 * ---6. Sending a peer AS---
-	 * 	Collector:
-	 * 	Peer Type:
-	 * 	Peer BGP ID:
-	 * 	Peer IP Address:
-	 * 
-	 * */
 	public final static int NUMBER_OF_IDENTIFIERS = 7;
 	public final static String FILE_BASE_NAME = "P_FILE";
 	public final static String DIR_ROOT_NAME = "P_ROOT_DIR/";
+	public final static String FILE_META_BASE_NAME = "P_META_FILE";
 	public static String[] IDENTIFIERS = {"Prefix", "Sequence Number", "Peer Index", "Path Segment Value", "NEXT_HOP", "Peer AS"};
 	
 	public static void main(String[] args) {
 		List<String> finderFileLines = new ArrayList<>();
 		String finderFileName = "";
 		String metaFileName = "";
-		String regex = "";
 		List<String>[] identifierDataLists = new ArrayList[NUMBER_OF_IDENTIFIERS];
-		
-		
-		//Pattern commandPatter = Pattern.compile("-\\w");
 		/**
 		 * Parsing arguments.
 		 * START
@@ -132,14 +82,19 @@ public class Provider {
 			e.printStackTrace();
 		}
 		finderFileLines.addAll(Arrays.asList(lineBuilder.toString().split("\n")));
-		regex = finderFileLines.remove(0); /* Get the regex to use. */
-		finderFileLines.remove(0); /* Remove the line dividor. */
-		for (String line : finderFileLines) {
-			System.out.println(line);
-		}
-		System.out.println(metaFileName);
+		//regex = finderFileLines.remove(0); /* Get the regex to use. */
+		//finderFileLines.remove(0); /* Remove the line dividor. */
+		/**
+		 * Read from F_FILE_X
+		 * END
+		 */
+
+		/**
+		 * Create Provider meta file.
+		 * START
+		 */
 		try {
-			FileOutputStream pMetaOut = new FileOutputStream("P_META_FILE");
+			FileOutputStream pMetaOut = new FileOutputStream(Provider.FILE_META_BASE_NAME);
 			Integer size = finderFileLines.size();
 			pMetaOut.write(size.toString().getBytes());
 			pMetaOut.write("\n".getBytes());
@@ -150,14 +105,12 @@ public class Provider {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-			
-
 		/**
-		 * Read from F_FILE_X
+		 * Create Provider meta file.
 		 * END
 		 */
-		
+			
+
 		/**
 		 * Read from F_META_FILE_X
 		 * START
@@ -174,94 +127,65 @@ public class Provider {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		for (int i = 0; i < IDENTIFIERS.length; i++) {
-			for (String line: identifierDataLists[i]) {
-				System.out.println(line);
-			}
-		}
+
 		/**
 		 * Read from F_META_FILE_X
 		 * END
 		 */
 		
 		/* Loop START */
-		System.out.println("Before");
-		System.out.println(finderFileLines.size());
+		//System.out.println(finderFileLines.size());
 		new File(Provider.DIR_ROOT_NAME).mkdir();
+		/**
+		 * Search in all E_FILE_X matched in FINDER.
+		 * START
+		 */
 		for (String fileName : finderFileLines) {
-			System.out.println("FileName = " + fileName);
+
 			/**
 			 * Search in E_FILE_X
 			 * START
 			 */
 			
 			try (FileInputStream in = new FileInputStream(fileName)){
+				/**
+				 * Read E_FILE_X to String.
+				 */
 				StringBuilder fileBuilder = new StringBuilder();
 				byte[] fileBuffer = new byte[Extractor.KB];
 				while((bytesRead = in.read(fileBuffer)) != -1) {
 					fileBuilder.append(new String(fileBuffer, 0, bytesRead));
 				}
-				/*
-				BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-				for (String nextHop : identifierDataLists[4]) {
-					int nextHopIndex = fileBuilder.toString().indexOf(nextHop);
-					if (nextHopIndex == -1) {
-						continue;
-					}
-					String pathSegmentValue = "Path Segment Value: ";
-					String tillPathSegmentString = fileBuilder.toString().substring(0, nextHopIndex);
-					int pathSegmentValueIndex = tillPathSegmentString.lastIndexOf(pathSegmentValue);
-					pathSegmentValueIndex += pathSegmentValue.length();
-					int pathSegmentValueEndIndex = tillPathSegmentString.indexOf('\n', pathSegmentValueIndex);
-					String segmentValues = tillPathSegmentString.substring(pathSegmentValueIndex, pathSegmentValueEndIndex);
-					String[] values = segmentValues.split(" ");
-					List<String> valuesList = new ArrayList<>(Arrays.asList(values));
-					System.out.println("File: " + fileName);
-					System.out.println("AS PATH:");
-					valuesList.stream().forEach((v)->System.out.println(v));
-					FileOutputStream out = new FileOutputStream("P_FILE_" + fileName.substring(fileName.lastIndexOf('_') + 1, fileName.length()));
-					out.write(("NEXT_HOP: " + nextHop + "\n").getBytes());
-					valuesList.stream().forEach((v)->{
-						try {
-							if (valuesList.indexOf(v) == valuesList.size() - 1) {
-								out.write((v).getBytes());	
-							} else {
-								out.write((v + " -> ").getBytes());
-							}
-							
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					});
-					out.write(("\n").getBytes());
-				}
-				*/
-				/* AS provided. */
 				
+				/* Create P_FILE_X */
 				String pFile = DIR_ROOT_NAME + FILE_BASE_NAME + "_" + fileName.substring(fileName.lastIndexOf('_') + 1, fileName.length());
-				System.out.println("Writing to " + pFile);
 				FileOutputStream out = new FileOutputStream(pFile);
 				String fileAsString = fileBuilder.toString();
+				/* Write two header values. */
 				out.write((getMrtInitialDataHeader(fileAsString, "Prefix: ") + "\n").getBytes());
 				out.write((getMrtInitialDataHeader(fileAsString, "Prefix Length: ") + "\n").getBytes());
 				out.flush();
 				
+				/* Write searched ASs to P_FILE_X. */
 				StringBuilder asListBuilder = new StringBuilder();
 				identifierDataLists[3].stream().forEach((v)->{
 					if (fileAsString.contains(v)) {
 						asListBuilder.append(v + ":");	
 					}
-				}); /* Ad to the header of P_FILE */
+				});
+				
+				/* Delete the last ':' from P_FILE_X. */
 				if (asListBuilder.length() > 0) {
 					asListBuilder.deleteCharAt(asListBuilder.length() - 1);	
 				}
 				out.write(asListBuilder.toString().getBytes());
 				out.write("\n".getBytes());
 				out.write("\n".getBytes());
+				/* Loop over ASN (AS Numbers) in IDENTIFIERDATALISTS[3]. */
 				for (String asn : identifierDataLists[3]) {
+					/* Get an AS path containing ASN. */
 					List<String> paths = getAsPaths(fileAsString, asn);
-					System.out.println("paths.size = " + paths.size() + " for asn = " + asn);
+					/* Write all AS paths in PATHS to P_FILE_X. */
 					paths.stream().forEach((v)->{
 						try {
 							out.write((v + "\n").getBytes());
@@ -282,19 +206,21 @@ public class Provider {
 			 * Search in E_FILE_X
 			 * END
 			 */
-			
-			/**
-			 * Write result to P_FILE_X
-			 * START
-			 */
-			
-			/**
-			 * Write result to P_FILE_X
-			 * END
-			 */
 		}
+		/**
+		 * Search in all E_FILE_X matched in FINDER.
+		 * END
+		 */
 	}
-	
+	/**
+	 * This function takes a identifier, often a 'F_META_FILE_X' and returns the data following that identifier.
+	 * 
+	 * @param identifier		a MRT identifier, see Provider.IDENTIFIERS. 
+	 * @param in				reader to file containing the data.
+	 * @return					returns the data following IDENTIFIER until a line divider, Finder.LINE_DIVIDER occurs.
+	 * 
+	 * @see Find.Finder
+	 */
 	public static List<String> getIdentifierLines(String identifier, BufferedReader in) {
 		List<String> list = new ArrayList<>();
 		try {
@@ -318,6 +244,12 @@ public class Provider {
 		return list;
 	}
 	
+	/**
+	 * This function returns header data from the beginning of a MRT file.
+	 * @param mrtFile		a MRT file as a String.
+	 * @param header		header that you are searching for.
+	 * @return				the header value following the header.
+	 */
 	public static String getMrtInitialDataHeader(String mrtFile, String header) {
 		int prefixStartIndex = mrtFile.indexOf(header) + header.length();
 		int prefixEndIndex = mrtFile.indexOf('\n', prefixStartIndex);
@@ -326,13 +258,20 @@ public class Provider {
 
 	}
 	
-	public static List<String> getAsPaths(String mrtHeader, String asn) {
+	/**
+	 * This function takes as arguments a MRT file (MRTFILE) and an AS number (ASN) and returns
+	 * all AS paths which contains ASN in MRTFILE.
+	 * @param mrtHeader		a MRT file as a String.
+	 * @param asn			a AS number.
+	 * @return				a list of all AS paths in MRTFILE containing ASN.
+	 */
+	public static List<String> getAsPaths(String mrtFile, String asn) {
 		String psv = "Path Segment Value: ";
 		List<String> asPathsList = new ArrayList<>();
 		int currentAsnIndex = 0;
-		for (int currPsvIndex = 0; currPsvIndex != -1; currPsvIndex = mrtHeader.indexOf(psv, currPsvIndex + 1)) {
-			int endOfLineIndex = mrtHeader.indexOf('\n', currPsvIndex);
-			String line = mrtHeader.substring(currPsvIndex + psv.length(), endOfLineIndex);
+		for (int currPsvIndex = 0; currPsvIndex != -1; currPsvIndex = mrtFile.indexOf(psv, currPsvIndex + 1)) {
+			int endOfLineIndex = mrtFile.indexOf('\n', currPsvIndex);
+			String line = mrtFile.substring(currPsvIndex + psv.length(), endOfLineIndex);
 			if (line.contains(asn)) {
 				asPathsList.add(line);
 			}

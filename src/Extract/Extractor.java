@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.channels.NonWritableChannelException;
 import java.security.KeyStore.TrustedCertificateEntry;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -67,8 +68,9 @@ public class Extractor {
 		}
 		
 		new File(DIR_ROOT_NAME).mkdir();
-		new File(DIR_ROOT_NAME + DIR_BASE_NAME + "_" + DIR_ID_COUNTER).mkdir();
-		
+		String dirName = DIR_ROOT_NAME + DIR_BASE_NAME + "_" + DIR_ID_COUNTER;
+		new File(dirName).mkdir();
+		System.out.println("Created: " +  dirName);
 		try (FileInputStream from = new FileInputStream(new File(dataFileName));) {
 			ByteArrayOutputStream bufferStream = new ByteArrayOutputStream();
 			byte[] buffer = new byte[LINE_SEP_LENGTH];
@@ -124,7 +126,9 @@ public class Extractor {
 					}
 					if (numberOfFiles % folderFilesSize == 0) {
 						DIR_ID_COUNTER++;
-						new File(DIR_ROOT_NAME + DIR_BASE_NAME + "_" + DIR_ID_COUNTER).mkdir();
+						dirName = DIR_ROOT_NAME + DIR_BASE_NAME + "_" + DIR_ID_COUNTER;
+						new File(dirName).mkdir();
+						System.out.println("Created '" + dirName + "'.");
 					}
 					
 				} else {

@@ -92,17 +92,34 @@ public class Wrapper {
 			}
 		}
 		
-		System.out.println("Extracting...");
-		Extractor.main(extractorArgs.stream().toArray(String[]::new));
-		System.out.println("Done");
-		System.out.println("Finding...");
-		Finder.main(finderArgs.toArray(new String[0]));
-		System.out.println("Done");
-		System.out.println("Providing...");
-		Provider.main(providerArgs.toArray(new String[0]));
-		System.out.println("Done");
-		System.out.println("Joining...");
-		Joiner.main(joinerArgs.toArray(new String[0]));
-		System.out.println("Done");
+		/* Only run if the arguments were provided. */
+
+		if (!extractorArgs.isEmpty()) {
+			System.out.println("Extracting...");
+			Extractor.main(extractorArgs.stream().toArray(String[]::new));
+			System.out.println("Done");
+			System.out.println("Run Finder next!");
+		} 
+		
+		if (!finderArgs.isEmpty()) {
+			System.out.println("Finding...");
+			Finder.main(finderArgs.toArray(new String[0]));
+			System.out.println("Done");
+			System.out.println("Run Provider next!");
+		} 
+		
+		if (!providerArgs.isEmpty()) {
+			System.out.println("Providing...");
+			Provider.main(providerArgs.toArray(new String[0]));
+			System.out.println("Done");
+			System.out.println("Run Joiner next!");
+		} 
+		/* If provided, run join automatically. */
+		if(!providerArgs.isEmpty()) {
+			System.out.println("Joining...");
+			Joiner.main(joinerArgs.toArray(new String[0]));
+			System.out.println("Done");
+			System.out.println("See result files!");
+		} 
 	}
 }

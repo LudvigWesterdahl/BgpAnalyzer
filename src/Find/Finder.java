@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -180,6 +179,8 @@ public class Finder {
 		}
 		regexBuilder.delete(regexBuilder.length() - 1, regexBuilder.length()); /* Remove last '|'. */
 		regexBuilder.append(")").append(CHARS);
+		/* Regex patter to use when searching the file. */
+		Pattern pattern = Pattern.compile(regexBuilder.toString());
 		/**
 		 * Generate regex from arguments.
 		 * END
@@ -189,17 +190,33 @@ public class Finder {
 		 * Search for matching files.
 		 * START
 		 */
-		Pattern pattern = Pattern.compile(regexBuilder.toString());
-		String lineDivider = Finder.LINE_DIVIDER + "\n";
-		String currentFinderFileName = Finder.generateUniqueFileName(Finder.FILE_BASE_NAME);
 		
+		String lineDivider = Finder.LINE_DIVIDER + "\n"; 
+		/* Generate a F_FILE_X name where X is a unique integer. */
+		String currentFinderFileName = Finder.generateUniqueFileName(Finder.FILE_BASE_NAME);
+		/* Create F_FILE_X. */
 		try (FileOutputStream out = new FileOutputStream(currentFinderFileName)){
-			Finder.writeListToStream(new ArrayList<>(Arrays.asList(regexBuilder.toString())), out, "", lineDivider, "\n");
-			for (int i = dirRange[0]; i <= dirRange[1]; i++) {
-				for (int y = 1; y <= foldersFileSize; y++) {
+			/* Loop over all E_DIR_X. */
+			for (int i = 1; Files.exists(Paths.get(Extractor.DIR_ROOT_NAME + Extractor.DIR_BASE_NAME + "_" + i)); i++) {
+				/*
+				 * Loop over all E_FILE_X.
+				 * 
+				 * E_DIR_1 contains files 'E_FILE_1' to 'E_FILE_(FOLDERFILESIZE)'
+				 * E_DIR_2 contains files 'E_FILE_(1 + FOLDERFILESIZE)' to 'E_FILE_(2 * FOLDERFILESIZE)'
+				 * E_DIR_3 contains files 'E_FILE_(1 + 2 * FOLDERFILESIZE)' to 'E_FILE_(3 * FOLDERFILESIZE)'
+				 * ...
+				 * E_DIR_X contains files 'E_FILE(1 + (X - 1) * FOLDERFILESIZE)' to 'E_FILE(X * FOLDERFILESIZE)'
+				 * */
+				for (int y = 1 + foldersFileSize * (i - 1) ; y <= foldersFileSize * i; y++) {
 					ByteArrayOutputStream partialFileAsBytes = new ByteArrayOutputStream();
 					String fileName = Extractor.DIR_ROOT_NAME + Extractor.DIR_BASE_NAME + "_" + i + "/" + Extractor.FILE_BASE_NAME + "_" + y;
-					FileInputStream in = new FileInputStream(fileName);
+					/* End of the directory, break the loops. */
+					if (!Files.exists(Paths.get(fileName))) {
+						y = foldersFileSize*i;
+						break;
+					}
+					
+					FileInputStream in = new FileInputStream(fileName); /* E_FILE_X*/
 					
 					int bytesRead1 = 0;
 					int bytesRead2 = 0;
@@ -276,8 +293,8 @@ public class Finder {
 			Finder.writeListToStream(pathSegmentValues, out, "> AS Paths (Path Segment Value)\n", lineDivider, "\n");
 			Finder.writeListToStream(nextHops, out, "> Next hops (NEXT_HOP)\n", lineDivider, "\n");
 			Finder.writeListToStream(peerASs, out, "> Peer ASs (Peer AS)\n", lineDivider, "\n");
-			Finder.writeListToStream(new ArrayList<>(Arrays.asList(dirRange[0])), out, "> Directory Search\nFrom (", "", "");
-			Finder.writeListToStream(new ArrayList<>(Arrays.asList(dirRange[1])), out, ") to and including (", ")\n" + lineDivider, "");
+			//Finder.writeListToStream(new ArrayList<>(Arrays.asList(dirRange[0])), out, "> Directory Search\nFrom (", "", "");
+			//Finder.writeListToStream(new ArrayList<>(Arrays.asList(dirRange[1])), out, ") to and including (", ")\n" + lineDivider, "");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
