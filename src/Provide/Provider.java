@@ -146,7 +146,6 @@ public class Provider {
 			 * Search in E_FILE_X
 			 * START
 			 */
-			
 			try (FileInputStream in = new FileInputStream(fileName)){
 				/**
 				 * Read E_FILE_X to String.

@@ -63,26 +63,47 @@ public class Joiner {
 					String prefix = fileReader.readLine();
 					String prefixLength = fileReader.readLine();
 					List<String> searchedASs = Arrays.asList(fileReader.readLine().split(":"));
+					/* No other connection to searched ASs.*/
+					/*
 					if (searchedASs.size() < 2) {
 						numberOfFiles--;
-						continue; /* No other connection to searched ASs.*/
+						continue; 
 					}
+					*/
 					String asPath;
 					
 					Set<String> interestingPaths = new HashSet<>(); /* Only unique paths. */
 					while((asPath = fileReader.readLine()) != null) {
 						int occurances = 0;
 						for (String asn : searchedASs) {
+							/* Only if the ASN is the first ASN in ASPATH. */
+							
+							StringBuilder reversePath = new StringBuilder(asPath);
+							reversePath.reverse();
+							StringBuilder asnReverse = new StringBuilder(asn);
+							asnReverse.reverse();
+							if (asPath.contains(asn)) {
+								interestingPaths.add(asPath);
+								allInterestingPaths.add(asPath);
+							}
+							
+							/*
+							if (reversePath.toString().startsWith(asnReverse.toString(), 0)) {
+								System.out.println("Added path: " + asPath + " for asn '" + asn + "'.");
+								interestingPaths.add(asPath);
+								allInterestingPaths.add(asPath);
+							}
+							*/
+							/*
 							if (asPath.contains(asn)) {
 								occurances++;
 								if (occurances > 1) {
 									interestingPaths.add(asPath);
 									allInterestingPaths.add(asPath);
-									//System.out.println(fileName);
-									//System.out.println(asPath);
 									break;
 								}
 							}
+							*/
 						}
 					}
 					if (interestingPaths.size() < 1) {

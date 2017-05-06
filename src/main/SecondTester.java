@@ -3,40 +3,51 @@ package main;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.chrono.MinguoChronology;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
 public class SecondTester {
 
 	public static void main(String[] args) {
-		System.out.println("Second Tester executed.");
-		String regex = "(\\d*\\s)*19283";
-		Pattern pattern = Pattern.compile(regex);
-		if (pattern.matcher("18273 12912387 1983").matches()) {
-			System.out.println("Matched");
-		} else {
-			System.out.println("Did not matchx");
+		Map<Integer, Integer> nodes = new HashMap();
+		nodes.put(1, 1);
+		nodes.put(2, 3);
+		nodes.put(3, 5);
+		nodes.put(4, 999);
+		for (Map.Entry<Integer, Integer> entry : nodes.entrySet()) {
+			System.out.println("Key: " + entry.getKey() + " Value: " + entry.getValue());
 		}
 		
-		new File("TestDirs/").mkdir();
 		
-		if (Files.exists(Paths.get("TestDirs/"))) {
-			System.out.println("Dir exist");
-		} else {
-			System.out.println("Does not exist.");
-		}
+		System.out.println(min(3, 5));
+		System.out.println(min(76, 76));
+		System.out.println(min(43, 5));
 		
-		System.out.println("hello world");
-		System.out.println(String.join("", Collections.nCopies(5, "\b")));
-		Set<String> set = new HashSet<>();
-		set.add("Hello");
-		set.add("Hello");
-		set.add("World");
-		for (String string : set) {
-			System.out.println(string);
-		}
+		int[] a = new int[2];
+		a[0] = 34;
+		a[1] = 95;
+		int[] b = Arrays.copyOf(a, a.length);
+		System.out.println("a[0] = " + a [0]);
+		System.out.println("a[1] = " + a [1]);
+		System.out.println("b[0] = " + b [0]);
+		System.out.println("b[1] = " + b [1]);
+		a[0] = 1337;
+		a[1] = 9;
+		System.out.println("a[0] = " + a [0]);
+		System.out.println("a[1] = " + a [1]);
+		System.out.println("b[0] = " + b [0]);
+		System.out.println("b[1] = " + b [1]);
+		
+
+	}
+	public static int min(int a, int b) {
+		  return (a <= b) ? a : b;
 	}
 
 }
